@@ -2,17 +2,19 @@ package main
 
 import (
 	"log"
+	"sync"
 	"time"
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 )
 
-func vis(philosophers []*philosopher, done, done2 chan string) {
+func vis(philosophers []*philosopher, done chan string, wg *sync.WaitGroup) {
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to init termui: %v", err)
 	}
 	defer ui.Close()
+	defer wg.Done()
 
 	gs := make([]*widgets.Gauge, 7)
 	for i := range gs {

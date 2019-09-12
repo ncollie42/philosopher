@@ -17,7 +17,7 @@ var (
 	MAX_HP                = 10
 	TIMEOUT time.Duration = 15
 	EATING  time.Duration = 2
-	RESTING time.Duration = 10
+	RESTING time.Duration = 2
 )
 
 type state int
@@ -112,11 +112,12 @@ func main() {
 	philosophers[0] = phil
 	dead := make(chan int, 1)
 	done := make(chan string, 1)
-	done2 := make(chan string, 1)
 
 	go phil.dine()
 	go overSeer(philosophers, dead)
-	go vis(philosophers, done, done2)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go vis(philosophers, done, &wg)
 
 	select {
 	case who := <-dead:
@@ -124,6 +125,5 @@ func main() {
 	case <-time.After(TIMEOUT * time.Second):
 		done <- fmt.Sprintf("Time to dance, no one died... Yay\n")
 	}
-	//use waitgroup
-	time.Sleep(5 * time.Second)
+	wg.Wait()
 }
